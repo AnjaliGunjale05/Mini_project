@@ -20,6 +20,9 @@ class Order extends Model
         'landmark',
         'postal_code',
         'total',
+        'status',
+        'payment_status',
+        'transaction_id',
     ];
 
     public function items()

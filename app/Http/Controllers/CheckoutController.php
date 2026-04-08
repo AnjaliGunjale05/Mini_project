@@ -22,17 +22,20 @@ class CheckoutController extends Controller
 
     public function index()
     {
-         if (auth()->check()) {
-        app(\App\Services\CartService::class)->syncCartFromDB();
-    } 
+        if (auth()->check()) {
+            $this->cartService->syncCartFromDB(); // cleaner
+        }
+
         $cart = $this->cartService->getCart();
 
         if (empty($cart)) {
-            return redirect()->route('products.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('products.index')
+                ->with('error', 'Your cart is empty.');
         }
-        $countries=Country::all();
 
-        return view('checkout', compact('cart','countries'));
+        $countries = Country::all();
+
+        return view('checkout', compact('cart', 'countries'));
     }
 
     public function store(Request $request)
@@ -47,26 +50,44 @@ class CheckoutController extends Controller
             'landmark' => 'nullable|string',
             'postal_code' => 'required|digits:6',
         ]);
- 
+
         // Converting Id's into Name 
-         $countryName = Country::find($request->country)?->name;
-    $stateName   = State::find($request->state)?->name;
-    $cityName    = $request->city;
+        $countryName = Country::find($request->country)?->name;
+        $stateName   = State::find($request->state)?->name;
+        $cityName    = $request->city;
 
-    $data = [
-        'name'        => $request->name,
-        'email'       => $request->email,
-        'phone'       => $request->phone,
-        'country'     => $countryName,
-        'state'       => $stateName,
-        'city'        => $cityName,
-        'landmark'    => $request->landmark,
-        'postal_code' => $request->postal_code,
-    ];
+        $data = [
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'phone'       => $request->phone,
+            'country'     => $countryName,
+            'state'       => $stateName,
+            'city'        => $cityName,
+            'landmark'    => $request->landmark,
+            'postal_code' => $request->postal_code,
+        ];
 
-        $order = $this->orderService->placeOrder($data,auth()->id() );
+        // Create Order
+        $order = $this->orderService->placeOrder($data, auth()->id());
 
-        return redirect()->route('checkout.confirmation', $order->id)->with('success',"Order Placed Successfully !");
+        if (!$order) {
+            return response()->json(['error' => 'Cart is empty'], 400);
+        }
+
+        //  RETURN JSON (IMPORTANT)
+        return response()->json([
+            'order_id' => $order->id,
+            'amount'   => $order->total
+        ]);
+    }
+    public function paymentSuccess(Request $request)
+    {
+        $this->orderService->markAsPaid(
+            $request->order_id,
+            $request->razorpay_payment_id
+        );
+
+        return response()->json(['success' => true]);
     }
 
     public function confirmation($orderId)

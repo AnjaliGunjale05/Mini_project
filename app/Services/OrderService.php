@@ -14,13 +14,7 @@ class OrderService
         $this->cartService = $cartService;
     }
 
-    /**
-     * Place an order
-     *
-     * @param array $data ['name','email','phone','address']
-     * @param int|null $userId
-     * @return Order|null
-     */
+
     public function placeOrder(array $data, ?int $userId = null)
     {
         $cart = $this->cartService->getCart();
@@ -36,11 +30,13 @@ class OrderService
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'],
             'country' => $data['country'],
-            'state'=>$data['state'],
-            'city'=>$data['city'],
-            'landmark'=>$data['landmark'],
-            'postal_code'=>$data['postal_code'],
+            'state' => $data['state'],
+            'city' => $data['city'],
+            'landmark' => $data['landmark'],
+            'postal_code' => $data['postal_code'],
             'total' => $this->cartService->getTotal(),
+            'payment_status' => 'pending',
+            'transaction_id' => null
         ]);
 
         // Create OrderItems
@@ -54,8 +50,22 @@ class OrderService
         }
 
         // Clear cart
-        $this->cartService->clearCart();
+        // $this->cartService->clearCart();
 
         return $order;
+    }
+    public function markAsPaid($orderId, $transactionId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        $order->update([
+            'transaction_id' => $transactionId,
+            'payment_status' => 'paid'
+        ]);
+
+        // Clear cart AFTER payment success
+        $this->cartService->clearCart();
+
+        return true;
     }
 }

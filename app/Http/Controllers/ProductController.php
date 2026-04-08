@@ -98,6 +98,14 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('category','images');
-        return view('show', compact('product'));
+
+        // Related Product
+
+        $relatedProducts=Product::where('category_id',$product->category_id)
+        ->where('id', '!=' , $product->id)
+        ->inRandomOrder()
+        ->take(4)
+        ->get();
+        return view('show', compact('product','relatedProducts'));
     }
 }

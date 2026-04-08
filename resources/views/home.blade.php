@@ -74,7 +74,7 @@
                 <a href="{{route('product.show',$product->id)}}">
                     <!-- Image -->
                     <img src="{{ $product->image ? asset('storage/'.$product->image) : asset('default.png') }}"
-                        class="h-48 w-full object-cover rounded">
+                        class="h-48 w-full object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded">
 
                     <!-- Name -->
                     <h3 class="mt-3 font-semibold">

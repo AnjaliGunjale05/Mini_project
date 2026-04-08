@@ -1,61 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
+
 <body>
     <!-- Footer -->
-<footer class="bg-pink-50 mt-12">
-    <div class="container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer class="bg-pink-50 mt-12">
+        <div class="container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
 
-        <!-- Brand -->
-        <div>
-            <h2 class="text-2xl font-bold text-pink-600 mb-3">Womona</h2>
-            <p class="text-gray-600">
-                Discover the latest trends in women's fashion. Style that defines you.
-            </p>
+            <!-- Brand -->
+            <div>
+                <h2 class="text-2xl font-bold text-pink-600 mb-3">Womona</h2>
+                <p class="text-gray-600">
+                    Discover the latest trends in women's fashion. Style that defines you.
+                </p>
+            </div>
+
+            <!-- Shop -->
+            <!-- Links -->
+            <div>
+                <h3 class="font-bold text-lg mb-2">Quick Links</h3>
+                <ul class="text-gray-600 space-y-1">
+                    <li><a href="{{ route('about') }}">About Us</a></li>
+                    <li><a href="{{ route('contact') }}">Contact</a></li>
+                    <li><a href="{{ route('privacy') }}">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-lg mb-2">Address Links</h3>
+                <p>
+                    📧
+                    <a href="mailto:connecttoexplorewithus@gmail.com " class="hover:text-pink-600">connecttoexplorewithus@gmail.com
+
+                    </a>
+                </p>
+                <p>
+                    📞
+                    <a href="tel:+919307656794" class="hover:text-pink-600"> +91 9876543210
+
+                    </a>
+                </p>
+                <p>
+                    📍
+                    <a href="https://www.google.com/maps?q=Mumbai,India"
+                        target="_blank"
+                        class="hover:text-pink-600">
+                        Mumbai, India
+                    </a>
+                </p>
+            </div>
+
+            <div class="flex space-x-4 mt-4 text-xl">
+                <h3 class="font-bold text-lg mb-2">Follow us</h3>
+
+                <a href="https://womona.com" target="_blank" class="hover:text-pink-600">
+                    <i class="fas fa-globe"></i>
+                </a>
+
+                <a href="https://www.facebook.com/womona" target="_blank" class="hover:text-pink-600">
+                    <i class="fab fa-facebook"></i>
+                </a>
+
+                <a href="https://www.instagram.com/womona__official" target="_blank" class="hover:text-pink-600">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="https://twitter.com/womona" target="_blank" class="hover:text-pink-600">
+                    <i class="fab fa-twitter"></i>
+                </a>
+
+            </div>
+
         </div>
 
-        <!-- Shop -->
-        <div>
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Shop</h3>
-            <ul class="space-y-2 text-gray-600">
-                <li><a href="#" class="hover:text-pink-600">Dresses</a></li>
-                <li><a href="#" class="hover:text-pink-600">Tops</a></li>
-                <li><a href="#" class="hover:text-pink-600">Ethnic Wear</a></li>
-                <li><a href="#" class="hover:text-pink-600">Accessories</a></li>
-            </ul>
+        <!-- Bottom -->
+        <div class="bg-pink-100 text-center py-4 text-gray-600">
+            © 2026 Womona. All rights reserved.
         </div>
-
-        <!-- Help -->
-        <!-- <div>
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Help</h3>
-            <ul class="space-y-2 text-gray-600">
-                <li><a href="#" class="hover:text-pink-600">Order Tracking</a></li>
-                <li><a href="#" class="hover:text-pink-600">Returns</a></li>
-                <li><a href="#" class="hover:text-pink-600">Shipping</a></li>
-                <li><a href="#" class="hover:text-pink-600">FAQs</a></li>
-            </ul>
-        </div> -->
-
-        <!-- Newsletter -->
-        <div>
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Stay Updated</h3>
-            <p class="text-gray-600 mb-3">Subscribe for latest offers & trends</p>
-            <input type="email" placeholder="Enter your email"
-                class="w-full border rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-pink-400">
-            <button class="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700">
-                Subscribe
-            </button>
-        </div>
-    </div>
-
-    <!-- Bottom -->
-    <div class="bg-pink-100 text-center py-4 text-gray-600">
-        © 2026 Womona. All rights reserved.
-    </div>
-</footer>
+    </footer>
 </body>
+
 </html>

@@ -9,7 +9,7 @@
 
             <h2 class="text-2xl font-semibold mb-6 border-b pb-3">Shipping Details </h2>
 
-            <form action="{{ route('checkout.store') }}" method="POST">
+            <form id="checkout-form" action="{{ route('checkout.store') }}" method="POST">
                 @csrf
 
                 <!-- Name -->
@@ -83,9 +83,9 @@
                 </div>
 
                 <!-- Button -->
-                <button type="submit"
+                <button type="button" id="checkout-btn"
                     class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    Place Order
+                    Place Order & Pay
                 </button>
             </form>
         </div>
@@ -126,4 +126,32 @@
         </div>
     </div>
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById('checkout-btn').onclick = function () {
+
+    fetch("{{ route('checkout.store') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+            name: document.querySelector('[name=name]').value,
+            email: document.querySelector('[name=email]').value,
+            phone: document.querySelector('[name=phone]').value,
+            country: document.querySelector('[name=country]').value,
+            state: document.querySelector('[name=state]').value,
+            city: document.querySelector('[name=city]').value,
+            landmark: document.querySelector('[name=landmark]').value,
+            postal_code: document.querySelector('[name=postal_code]').value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        window.location.href = "/payment/" + data.order_id;
+    });
+};
+</script>
 @endsection

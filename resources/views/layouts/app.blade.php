@@ -14,28 +14,40 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
     <!-- Scripts -->
-     <script src="{{ asset('asset/js/checkout.js') }}"></script>
+    <script src="{{ asset('asset/js/checkout.js') }}"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
 
     <!-- Header  -->
-     
+
     @if(!request()->is('admin/*'))
     @include('layouts.header')
     @endif
 
-      <!--  SUCCESS MESSAGE HERE -->
+    <!--  SUCCESS MESSAGE HERE -->
     @if(session('success'))
     <div id="success-message"
         class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg transition">
         {{ session('success') }}
     </div>
 
+    @if(session('error'))
+    <div id="error-message" class="max-w-6xl mx-auto mt-4">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            {{ session('error') }}
+        </div>
+    </div>
+    @endif
+
+   
+
     <script>
         setTimeout(() => {
-            document.getElementById('success-message').style.display = 'none';
+            document.querySelectorAll('[class*="bg-green"], [class*="bg-red"]').forEach(el => {
+                el.style.display = 'none';
+            });
         }, 3000);
     </script>
     @endif
@@ -73,4 +85,5 @@
         });
     </script>
 </body>
+
 </html>

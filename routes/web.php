@@ -8,6 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ContactController;
 
 use App\Models\State;
 use App\Models\City;
@@ -40,6 +42,37 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::get('/my-orders/{order}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
 });
+
+// Payment 
+// Route::get('/payment/{id}', [PaymentController::class, 'pay'])->name('payment.pay');
+// Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+
+// Route::get('/payment-success/{id}', [PaymentController::class, 'successPage'])->name('payment.success.page');
+
+Route::post('/payment-success', [PaymentController::class, 'success'])
+    ->name('payment.success');
+
+Route::get('/payment-success', function () {
+    return view('payment_success');
+});
+
+// Payment Page
+Route::get('/payment/{order}', [PaymentController::class, 'pay'])->name('payment.pay');
+
+// Payment Success (AJAX)
+Route::post('/payment-success', [CheckoutController::class, 'paymentSuccess'])->name('payment.success');
+
+// Confirmation Page
+Route::get('/payment-success/{order}', [PaymentController::class, 'successPage'])->name('payment.success.page');
+
+// Fotter
+
+Route::view('/about', 'about')->name('about');
+Route::view('/contact', 'contact')->name('contact');
+Route::view('/privacy', 'privacy')->name('privacy');
+
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
 
 // ================= DASHBOARD REDIRECT =================
 

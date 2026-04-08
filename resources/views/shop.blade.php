@@ -54,7 +54,7 @@
                 <!-- Image -->
                 <img
                     src="{{ $product->image ? asset('storage/'.$product->image) : asset('default.png') }}"
-                    class="h-48 w-full object-cover rounded">
+                    class="h-48 w-full object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded">
 
                 <!-- Name -->
                 <h2 class="text-lg font-semibold mt-3">

@@ -17,8 +17,11 @@
                 Womona
             </div>
 
+            
+
             <!-- Navigation -->
             <nav class="hidden md:flex space-x-8 text-gray-700 font-medium">
+                
                 <a href="{{route('home') }}" class="hover:text-pink-600">Home</a>
                 <a href="{{route('shop') }}" class="hover:text-pink-600">Shop</a>
 
