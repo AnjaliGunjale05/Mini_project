@@ -7,6 +7,16 @@
         class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg transition">
         {{ session('success') }}
     </div>
+    @elseif(session('error'))
+    <div id="success-message"
+        class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg transition">
+        {{ session('error') }}
+    </div>
+    @elseif(session('exceeded'))
+    <div id="success-message"
+        class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg transition">
+        {{ session('exceeded') }}
+    </div>
 
     <script>
         setTimeout(() => {

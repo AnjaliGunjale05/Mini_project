@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Services\CartService;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -29,13 +30,20 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // CartMerge
+
+        app(CartService::class)
+            ->mergeGuestCartWithUserCart();
+        return redirect()->intended('/')->with('success','Your cart has been Restored!');
+
+
         // Role Based Redirect
 
         if (auth()->user()->role === 'admin') {
             return redirect()->intended(route('dashboard'));
         }
 
-        app(\App\Services\CartService::class)->syncCartAfterLogin();
+        app(CartService::class)->syncCartAfterLogin();
 
 
         // Normal user -> home page 

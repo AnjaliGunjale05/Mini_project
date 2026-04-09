@@ -14,7 +14,7 @@
             <!-- <h1 class="text-2xl font-bold mb-5">Thank You!</h1> -->
             <p class="text-gray-600 mt-2">Your order has been placed successfully.</p>
         </div>
-        <!-- ✅ Header -->
+        <!--  Header -->
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-green-600">Order Confirmed 🎉</h1>
             <p class="text-gray-600 mt-2">Thank you for shopping with us!</p>

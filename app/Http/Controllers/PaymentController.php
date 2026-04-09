@@ -4,28 +4,60 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Services\PaymentService;
+use App\Services\OrderService;
 
 class PaymentController extends Controller
 {
+    protected $paymentService;
+    protected $orderService;
+
+    public function __construct(PaymentService $paymentService, OrderService $orderService)
+    {
+        $this->paymentService = $paymentService;
+        $this->orderService = $orderService;
+    }
+
+    //  Show payment page
     public function pay($orderId)
     {
         $order = Order::findOrFail($orderId);
 
-        return view('payment', compact('order'));
+        $razorpayOrderId = $this->paymentService->createRazorpayOrder($order);
+
+        return view('payment', compact('order', 'razorpayOrderId'));
     }
 
+    //  Handle payment success (AJAX)
     public function success(Request $request)
     {
-        $order = Order::find($request->order_id);
+        $order = Order::findOrFail($request->order_id);
 
-        // if ($order) {
-        //     $order->update([
-        //         'payment_status' => 'paid',
-        //         'transaction_id' => $request->razorpay_payment_id,
-        //     ]);
-        // }
+        $isVerified = $this->paymentService->verifyPayment($request->all(), $order);
 
-        return redirect()->route('checkout.confirmation', $order->id)
-            ->with('success', 'Payment Successful!');
+        if ($isVerified) {
+
+            //  Update order + send email + clear cart
+            $this->orderService->handleSuccessfulOrder(
+                $order,
+                $request->razorpay_payment_id
+            );
+
+            return response()->json([
+                'status' => 'success'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'failed'
+        ], 400);
+    }
+
+    // Success Page
+    public function successPage($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        return view('payment_success', compact('order'));
     }
 }

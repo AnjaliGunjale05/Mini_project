@@ -1,20 +1,24 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\AdminOrderController;
-use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ContactController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+use App\Http\Controllers\{
+    ProfileController,
+    ProductController,
+    CategoryController,
+    CartController,
+    HomeController,
+    CheckoutController,
+    AdminOrderController,
+    WishlistController,
+    PaymentController,
+    ContactController,
+    OrderController
+};
 
 use App\Models\State;
 use App\Models\City;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 // ================= FRONTEND =================
 
@@ -24,49 +28,40 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Shop
 Route::get('/shop', [ProductController::class, 'index'])->name('shop');
 
-// Product details
+// Product Details
+Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 
- Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 
- // Wishlist 
-
+// ================= WISHLIST =================
 Route::middleware('auth')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/add/{id}', [WishlistController::class, 'add'])->name('wishlist.add');
     Route::post('/wishlist/remove/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
-// My Orders User
 
+// ================= USER ORDERS =================
 Route::middleware('auth')->group(function () {
-    Route::get('/my-orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/my-orders/{order}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
-// Payment 
-// Route::get('/payment/{id}', [PaymentController::class, 'pay'])->name('payment.pay');
-// Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
 
-// Route::get('/payment-success/{id}', [PaymentController::class, 'successPage'])->name('payment.success.page');
-
-Route::post('/payment-success', [PaymentController::class, 'success'])
-    ->name('payment.success');
-
-Route::get('/payment-success', function () {
-    return view('payment_success');
-});
+// ================= PAYMENT =================
 
 // Payment Page
 Route::get('/payment/{order}', [PaymentController::class, 'pay'])->name('payment.pay');
 
-// Payment Success (AJAX)
-Route::post('/payment-success', [CheckoutController::class, 'paymentSuccess'])->name('payment.success');
+// Payment Success (ONLY ONE ROUTE )
+Route::post('/payment-success', [PaymentController::class, 'success'])
+    ->name('payment.success');
 
 // Confirmation Page
-Route::get('/payment-success/{order}', [PaymentController::class, 'successPage'])->name('payment.success.page');
+Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])
+    ->name('checkout.confirmation');
 
-// Fotter
 
+// ================= STATIC PAGES =================
 Route::view('/about', 'about')->name('about');
 Route::view('/contact', 'contact')->name('contact');
 Route::view('/privacy', 'privacy')->name('privacy');
@@ -74,8 +69,7 @@ Route::view('/privacy', 'privacy')->name('privacy');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 
-// ================= DASHBOARD REDIRECT =================
-
+// ================= DASHBOARD =================
 Route::get('/dashboard', function () {
 
     if (Auth::user()->role === 'admin') {
@@ -83,37 +77,31 @@ Route::get('/dashboard', function () {
     }
 
     return redirect()->route('home');
+
 })->middleware(['auth'])->name('dashboard');
 
 
 // ================= ADMIN =================
-
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
-    // Dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    // Products
     Route::resource('products', ProductController::class);
-    // Categories
     Route::resource('categories', CategoryController::class);
 
-    // Orders
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
 
-    //  FIX: admin/profile route
     Route::get('/profile', function () {
         return redirect()->route('profile.edit');
     });
 });
 
 
-// ================= PROFILE (COMMON) =================
-
+// ================= PROFILE =================
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -123,7 +111,6 @@ Route::middleware(['auth'])->group(function () {
 
 
 // ================= CART =================
-
 Route::controller(CartController::class)->group(function () {
 
     Route::get('/cart', 'index')->name('cart.index');
@@ -134,20 +121,19 @@ Route::controller(CartController::class)->group(function () {
 
 
 // ================= CHECKOUT =================
-
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
 
+
+// ================= LOCATION APIs =================
 Route::get('/states/{countryId}', function ($countryId) {
-    return \App\Models\State::where('country_id', $countryId)->get();
+    return State::where('country_id', $countryId)->get();
 });
 
 Route::get('/cities/{stateId}', function ($stateId) {
-    return \App\Models\City::where('state_id', $stateId)->get();
+    return City::where('state_id', $stateId)->get();
 });
 
 
 // ================= AUTH =================
-
 require __DIR__ . '/auth.php';

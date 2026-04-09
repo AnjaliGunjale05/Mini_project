@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderPlacedMail;
+use Exception;
 
 class OrderService
 {
@@ -14,16 +17,15 @@ class OrderService
         $this->cartService = $cartService;
     }
 
-
+    // Create Order (NO payment logic here)
     public function placeOrder(array $data, ?int $userId = null)
     {
         $cart = $this->cartService->getCart();
 
         if (empty($cart)) {
-            return null; // nothing to order
+            return null;
         }
 
-        // Create Order
         $order = Order::create([
             'user_id' => $userId,
             'name' => $data['name'],
@@ -36,10 +38,9 @@ class OrderService
             'postal_code' => $data['postal_code'],
             'total' => $this->cartService->getTotal(),
             'payment_status' => 'pending',
-            'transaction_id' => null
+            'transaction_id' => null,
         ]);
 
-        // Create OrderItems
         foreach ($cart as $productId => $item) {
             OrderItem::create([
                 'order_id' => $order->id,
@@ -49,21 +50,29 @@ class OrderService
             ]);
         }
 
-        // Clear cart
-        // $this->cartService->clearCart();
+        $order->load('items.product');
 
         return $order;
     }
-    public function markAsPaid($orderId, $transactionId)
-    {
-        $order = Order::findOrFail($orderId);
 
+    //  Call AFTER successful payment
+    public function handleSuccessfulOrder($order, $transactionId)
+    {
         $order->update([
             'transaction_id' => $transactionId,
-            'payment_status' => 'paid'
+            'payment_status' => 'paid',
         ]);
 
-        // Clear cart AFTER payment success
+        // Send email after payment success
+        try {
+            if ($order->email) {
+                Mail::to($order->email)->send(new OrderPlacedMail($order));
+            }
+        } catch (Exception $e) {
+            \Log::error('Mail Error: ' . $e->getMessage());
+        }
+
+        // Clear cart
         $this->cartService->clearCart();
 
         return true;

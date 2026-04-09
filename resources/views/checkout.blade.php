@@ -62,7 +62,7 @@
                     <label class="block text-sm font-medium mb-1">City</label>
                     <input name="city" id="city"
                         class="w-full border rounded-lg px-3 py-2">
-                       
+
                     </input>
                     @error('phone') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                 </div>
@@ -125,33 +125,51 @@
             </div>
         </div>
     </div>
+
 </div>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-document.getElementById('checkout-btn').onclick = function () {
+    document.getElementById('checkout-btn').onclick = function() {
 
-    fetch("{{ route('checkout.store') }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-        },
-        body: JSON.stringify({
-            name: document.querySelector('[name=name]').value,
-            email: document.querySelector('[name=email]').value,
-            phone: document.querySelector('[name=phone]').value,
-            country: document.querySelector('[name=country]').value,
-            state: document.querySelector('[name=state]').value,
-            city: document.querySelector('[name=city]').value,
-            landmark: document.querySelector('[name=landmark]').value,
-            postal_code: document.querySelector('[name=postal_code]').value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        window.location.href = "/payment/" + data.order_id;
-    });
-};
+        fetch("{{ route('checkout.store') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    name: document.querySelector('[name=name]').value,
+                    email: document.querySelector('[name=email]').value,
+                    phone: document.querySelector('[name=phone]').value,
+                    country: document.querySelector('[name=country]').value,
+                    state: document.querySelector('[name=state]').value,
+                    city: document.querySelector('[name=city]').value,
+                    landmark: document.querySelector('[name=landmark]').value,
+                    postal_code: document.querySelector('[name=postal_code]').value
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Server error");
+                }
+                return res.json();
+            })
+            .then(data => {
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                window.location.href = "/payment/" + data.order_id;
+            })
+            .catch(err => {
+                console.error(err);
+
+
+                alert("Something went wrong");
+            });
+    };
 </script>
 @endsection

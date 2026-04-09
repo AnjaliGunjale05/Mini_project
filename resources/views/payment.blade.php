@@ -20,13 +20,14 @@
 
 <script>
     var options = {
-        "key": "rzp_test_Saev3PP8kBoMSf",
-        "amount": "{{ $order->total * 100 }}",
-        "currency": "INR",
-        "name": "Your Store",
-        "description": "Test Payment",
+        key: "rzp_test_SbMIU9yifGnU5b",
+        amount: "{{ $order->total * 100 }}",
+        currency: "INR",
+        name: "Your Store",
+        description: "Test Payment",
+        order_id: "{{ $razorpayOrderId }}", // ✅ comma fixed
 
-        "handler": function (response) {
+        handler: function (response) {
 
             fetch("{{ route('payment.success') }}", {
                 method: "POST",
@@ -35,16 +36,26 @@
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
                 body: JSON.stringify({
-                    order_id: "{{ $order->id }}",  // ✅ FIXED
-                    razorpay_payment_id: response.razorpay_payment_id
+                    order_id: "{{ $order->id }}",
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
                 })
             })
             .then(res => res.json())
-            .then(resData => {
+            .then(data => {
 
-                // ✅ REDIRECT TO SUCCESS PAGE
-                window.location.href = "/checkout/confirmation/{{ $order->id }}";
+                if (data.success) {
+                    // ✅ Redirect to confirmation page
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert("Payment verification failed");
+                }
 
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong during payment");
             });
         }
     };
@@ -54,7 +65,7 @@
     document.getElementById('rzp-button').onclick = function(e){
         rzp.open();
         e.preventDefault();
-    }
+    };
 </script>
 
 @endsection

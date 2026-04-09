@@ -16,7 +16,6 @@ class CartService
     // Add to Cart
     public function addToCart($id)
     {
-        \Log::info('ADD TO CART CALLED');
         $product = Product::findOrFail($id);
 
         // Stock check 
@@ -31,6 +30,12 @@ class CartService
             $cartItem = Cart::where('user_id', $userId)
                 ->where('product_id', $id)
                 ->first();
+
+                $currentQty= $cartItem ? $cartItem->quantity : 0;
+
+                if($currentQty +1 > $product->stock){
+                    return 'exceeded';
+                }
 
             if ($cartItem) {
                 $cartItem->increment('quantity');
@@ -47,6 +52,11 @@ class CartService
         } else {
 
             $cart = session()->get('cart', []);
+            $currentQty= isset($cart[$id]) ? $cart[$id]['quantity'] :0;
+            
+            if($currentQty +1 > $product->stock){
+                return 'exceeded';
+            }
 
             if (isset($cart[$id])) {
                 $cart[$id]['quantity']++;
@@ -68,7 +78,14 @@ class CartService
     // Update Quantity
     public function updateQuantity($id, $qty)
     {
-        $qty = max(1, (int) $qty); // ❗ prevent 0 or negative
+        $product= Product::findOrFail($id);
+        //  prevent 0 or negative
+        $qty = max(1, (int) $qty); 
+
+        // Stock validation
+        if($qty > $product->stock){
+            return 'exceeded';
+        }
 
         $cart = session()->get('cart', []);
 
@@ -124,7 +141,7 @@ class CartService
         $cart = [];
 
         foreach ($cartItems as $item) {
-            if ($item->product) { // ❗ safety check
+            if ($item->product) {
                 $cart[$item->product_id] = [
                     "name" => $item->product->name,
                     "price" => $item->product->price,
@@ -191,5 +208,40 @@ class CartService
         if (auth()->check()) {
             Cart::where('user_id', auth()->id())->delete();
         }
+    }
+
+    public function mergeGuestCartWithUserCart()
+    {
+        if (!auth()->check()) return;
+        $sessionCart = session()->get('cart', []);
+        $userId = auth()->id();
+
+        if (empty($sessionCart)) {
+            return;
+        }
+
+        foreach ($sessionCart as $productId => $item) {
+            $existing = Cart::where('user_id', $userId)
+                ->where('product_id', $productId)
+                ->first();
+
+            if ($existing) {
+                // If already exists → increase quantity
+                $existing->quantity += $item['quantity'];
+                $existing->save();
+            } else {
+                // Insert new
+                \App\Models\Cart::create([
+                    'user_id' => $userId,
+                    'product_id' => $productId,
+                    'quantity' => $item['quantity'],
+                ]);
+            }
+        }
+
+        // Clear session cart after merge
+        session()->forget('cart');
+        // Sync DB -> session
+        $this->syncCartFromDB();
     }
 }

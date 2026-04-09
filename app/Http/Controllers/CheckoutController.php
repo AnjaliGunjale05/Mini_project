@@ -6,8 +6,6 @@ use App\Models\Country;
 use Illuminate\Http\Request;
 use App\Services\CartService;
 use App\Services\OrderService;
-use App\Models\State;
-use App\Models\City;
 
 class CheckoutController extends Controller
 {
@@ -23,13 +21,13 @@ class CheckoutController extends Controller
     public function index()
     {
         if (auth()->check()) {
-            $this->cartService->syncCartFromDB(); // cleaner
+            $this->cartService->syncCartFromDB();
         }
 
         $cart = $this->cartService->getCart();
 
         if (empty($cart)) {
-            return redirect()->route('products.index')
+            return redirect()->route('shop')
                 ->with('error', 'Your cart is empty.');
         }
 
@@ -40,59 +38,56 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'phone' => 'required|regex:/^[0-9]{10}$/',
-            'country' => 'required',
-            'state' => 'required',
-            'city' => 'required|max:255|string',
-            'landmark' => 'nullable|string',
-            'postal_code' => 'required|digits:6',
-        ]);
+        try {
 
-        // Converting Id's into Name 
-        $countryName = Country::find($request->country)?->name;
-        $stateName   = State::find($request->state)?->name;
-        $cityName    = $request->city;
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email',
+                'phone' => 'required|regex:/^[0-9]{10}$/',
+                'country' => 'required',
+                'state' => 'required',
+                'city' => 'required|max:255|string',
+                'landmark' => 'nullable|string',
+                'postal_code' => 'required|digits:6',
+            ]);
 
-        $data = [
-            'name'        => $request->name,
-            'email'       => $request->email,
-            'phone'       => $request->phone,
-            'country'     => $countryName,
-            'state'       => $stateName,
-            'city'        => $cityName,
-            'landmark'    => $request->landmark,
-            'postal_code' => $request->postal_code,
-        ];
+            $countryName = \App\Models\Country::find($request->country)?->name;
+            $stateName   = \App\Models\State::find($request->state)?->name;
 
-        // Create Order
-        $order = $this->orderService->placeOrder($data, auth()->id());
+            $data = [
+                'name'        => $request->name,
+                'email'       => $request->email,
+                'phone'       => $request->phone,
+                'country'     => $countryName,
+                'state'       => $stateName,
+                'city'        => $request->city,
+                'landmark'    => $request->landmark,
+                'postal_code' => $request->postal_code,
+            ];
 
-        if (!$order) {
-            return response()->json(['error' => 'Cart is empty'], 400);
+            $order = $this->orderService->placeOrder($data, auth()->id());
+
+            if (!$order) {
+                return response()->json(['error' => 'Cart is empty'], 400);
+            }
+
+            return response()->json([
+                'order_id' => $order->id,
+                'amount'   => $order->total
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        //  RETURN JSON (IMPORTANT)
-        return response()->json([
-            'order_id' => $order->id,
-            'amount'   => $order->total
-        ]);
-    }
-    public function paymentSuccess(Request $request)
-    {
-        $this->orderService->markAsPaid(
-            $request->order_id,
-            $request->razorpay_payment_id
-        );
-
-        return response()->json(['success' => true]);
     }
 
     public function confirmation($orderId)
     {
-        $order = \App\Models\Order::with('items')->findOrFail($orderId);
+        $order = \App\Models\Order::with('items.product')->findOrFail($orderId);
+
         return view('checkout_confirmation', compact('order'));
     }
 }

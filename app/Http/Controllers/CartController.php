@@ -30,15 +30,16 @@ class CartController extends Controller
     // Add to Cart
     public function add($id)
     {
-        if (!auth()->check()) {
-        return redirect()->route('login')
-            ->with('error', 'Please login or create an account to add items to cart');
-    }
+        $result= $this->cartService->addToCart($id);
 
-    if (!$this->cartService->addToCart($id)) {
-        return back()->with('error', 'Product out of stock');
-    }
+        if($result === false){
+return back()->with('error', 'Product out of stock');
+        }
 
+        if($result === 'exceeded'){
+            return back()->with('error','cannot add more than available stock');
+        }
+    
         // $this->cartService->addToCart($id);
 
         return redirect()->back()->with('success', 'Product added to cart successfully!');
@@ -51,7 +52,11 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $this->cartService->updateQuantity($id, $request->quantity);
+        $result= $this->cartService->updateQuantity($id, $request->quantity);
+
+        if($result === 'exceeded'){
+            return redirect()->back()->with('error', 'cannot add more than available stock');
+        }
 
         return redirect()->back()->with('success', 'Cart updated successfully!');
     }
@@ -62,5 +67,9 @@ class CartController extends Controller
         $this->cartService->removeItem($id);
 
         return redirect()->back()->with('success', 'Item removed from cart!');
+    }
+
+    public function merge(){
+
     }
 }

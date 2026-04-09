@@ -23,6 +23,7 @@ class Order extends Model
         'status',
         'payment_status',
         'transaction_id',
+        'razorpay_order_id',
     ];
 
     public function items()
