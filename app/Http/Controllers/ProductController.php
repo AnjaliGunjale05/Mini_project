@@ -6,19 +6,25 @@ use App\Services\ProductService;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImages;
+use App\Services\RecentProductService;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
     protected $productService;
+    protected $recentProductService;
     // Inject Service
     // Constructor _construct Special method
 
-    public function __construct(ProductService $productService)
+    public function __construct(ProductService $productService, RecentProductService $recentProductService)
     {
         $this->productService = $productService;
+        $this->recentProductService = $recentProductService;
     }
     //  Display List of product 
     public function index(Request $request)
@@ -106,20 +112,34 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('categories', 'images');
+        try {
 
-        // get category ids
-        $categoryIds = $product->categories->pluck('id');
+            $product->load('categories', 'images');
 
-        // Related Product
+            // Store Recently Viewed Products
+            $this->recentProductService->store($product->id);
 
-        $relatedProducts = Product::whereHas('categories', function ($query) use ($categoryIds) {
-            $query->whereIn('categories.id', $categoryIds);
-        })
-            ->where('id', '!=', $product->id)
-            ->inRandomOrder()
-            ->take(4)
-            ->get();
-        return view('show', compact('product', 'relatedProducts'));
+            // get category ids
+            $categoryIds = $product->categories->pluck('id');
+
+            // Related Product
+
+            $relatedProducts = Product::whereHas('categories', function ($query) use ($categoryIds) {
+                $query->whereIn('categories.id', $categoryIds);
+            })
+                ->where('id', '!=', $product->id)
+                ->inRandomOrder()
+                ->take(4)
+                ->get();
+
+            //  Get Recent Products for sidebar or section
+            $recentProducts = $this->recentProductService->getRecentProducts();
+
+            return view('show', compact('product', 'relatedProducts', 'recentProducts'));
+        }
+         catch (Exception $e) {
+            Log::error('Product Show Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to load product details at this time.');
+        }
     }
 }

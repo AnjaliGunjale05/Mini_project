@@ -15,20 +15,37 @@
 
         <!-- LEFT: Product Image -->
         <div>
-            <img id="main-image"
-                src="{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}"
-                class="w-full h-96 object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded-lg border">
+            <div class="relative">
+
+                <!-- LEFT ARROW -->
+                <button onclick="prevImage()"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white shadow-md p-3 rounded-full z-10 hover:bg-gray-100">
+                    &#10094;
+                </button>
+
+                <!-- MAIN IMAGE -->
+                <img id="main-image"
+                    src="{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}"
+                    class="w-full h-96 object-cover rounded-lg border transition duration-300">
+
+                <!-- RIGHT ARROW -->
+                <button onclick="nextImage()"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white shadow-md p-3 rounded-full z-10 hover:bg-gray-100">
+                    &#10095;
+                </button>
+
+            </div>
 
             <!-- Thumbnails -->
             <div class="flex gap-3 mt-4 flex-wrap">
                 <!-- Main image thumbnail -->
-                <img onclick="changeImage(this)"
+                <img onclick="setImage(0)"
                     src="{{ asset('storage/' . $product->image) }}"
                     class="w-20 h-20 object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded cursor-pointer border hover:border-pink-500">
 
                 <!-- Gallery images -->
                 @foreach($product->images as $img)
-                <img onclick="changeImage(this)"
+                <img onclick="setImage({{$loop->index + 1}})"
                     src="{{ asset('storage/' . $img->image_path) }}"
                     class="w-20 h-20 object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded cursor-pointer border hover:border-pink-500">
                 @endforeach
@@ -141,11 +158,71 @@
             @endforelse
         </div>
     </div>
+
+    <!-- Recently Viewed Products -->
+    @if(isset($recentProducts) && $recentProducts->count())
+    <div class="mt-12">
+        <h2 class="text-2xl font-semibold mb-6"> Recently Viewed Products </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            @foreach($recentProducts as $item)
+            <a href="{{route('product.show',$item->id)}}" class="bg-white p-4 rounded-lg shadow transition-transform duration-300 hover:scale-110">
+
+                <!-- Image -->
+                <img src="{{ $item->image ? asset('storage/'.$item->image) : 'https://via.placeholder.com/300' }}"
+                    alt="" class="w-full h-60 object-cover rounded-lg border mb-2">
+
+                <!-- Name  -->
+                <h3 class="text-sm">
+                    {{$item->name}}
+                </h3>
+
+                <!-- Price -->
+                <p class="text-green-600 font-semibold text-sm mt-1">
+                    ₹{{number_format($item->price, 2)}}
+                </p>
+
+                <!-- Badge -->
+                <span class="text-xs text-gray-500">Recently Viewed </span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </div>
 
 
 <!-- JS for Image Change -->
+ 
 <script>
+     // Create image array
+    let images = [
+        "{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}",
+        @foreach($product->images as $img)
+            "{{ asset('storage/'.$img->image_path) }}",
+        @endforeach
+    ];
+
+    let currentIndex = 0;
+
+    function showImage(index) {
+        document.getElementById('main-image').src = images[index];
+    }
+
+    function nextImage() {
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+    }
+
+    function prevImage() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        showImage(currentIndex);
+    }
+
+    function setImage(index) {
+        currentIndex = index;
+        showImage(currentIndex);
+    }
     function changeImage(element) {
         document.getElementById('main-image').src = element.src;
     }

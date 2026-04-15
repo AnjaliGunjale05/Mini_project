@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('recent_products', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('product_id');
+            $table->timestamp('viewed_at')->nullable();
             $table->timestamps();
         });
     }

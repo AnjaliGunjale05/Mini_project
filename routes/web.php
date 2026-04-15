@@ -39,31 +39,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/wishlist/remove/{id}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 });
 
-
 // ================= USER ORDERS =================
 Route::middleware('auth')->group(function () {
     Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 });
 
-
 // ================= PAYMENT =================
-
-// Payment Page
-// Route::get('/payment/{order}', [PaymentController::class, 'pay'])->name('payment.pay');
-
-// // Payment Success 
-// Route::post('/payment-success', [PaymentController::class, 'success'])
-//     ->name('payment.success');
-
 Route::get('/payment/{id}', [PaymentController::class, 'pay'])->name('payment.pay');
 Route::get('/payment/success/{id}', [PaymentController::class, 'success'])->name('payment.success');
-
 
 // Confirmation Page
 Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])
     ->name('checkout_confirmation');
-
 
 // ================= STATIC PAGES =================
 Route::view('/about', 'layouts.footerlinks.about')->name('about');
@@ -84,7 +72,6 @@ Route::get('/dashboard', function () {
 
 })->middleware(['auth'])->name('dashboard');
 
-
 // ================= ADMIN =================
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
@@ -104,7 +91,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     });
 });
 
-
 // ================= PROFILE =================
 Route::middleware(['auth'])->group(function () {
 
@@ -112,7 +98,6 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 // ================= CART =================
 Route::controller(CartController::class)->group(function () {
@@ -123,11 +108,9 @@ Route::controller(CartController::class)->group(function () {
     Route::post('/cart/remove/{id}', 'remove')->name('cart.remove');
 });
 
-
 // ================= CHECKOUT =================
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-
 
 // ================= LOCATION APIs =================
 Route::get('/states/{countryId}', function ($countryId) {
@@ -137,7 +120,6 @@ Route::get('/states/{countryId}', function ($countryId) {
 Route::get('/cities/{stateId}', function ($stateId) {
     return City::where('state_id', $stateId)->get();
 });
-
 
 // ================= AUTH =================
 require __DIR__ . '/auth.php';
