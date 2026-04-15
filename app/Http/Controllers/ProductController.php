@@ -50,13 +50,17 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-            'images.*' => 'image|mimes:jpg,png,jpeg| max:2048'
+            'images.*' => 'image|mimes:jpg,png,jpeg| max:2048',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
         ]);
 
         // Call Service
 
-       $product= $this->productService->createProduct($request);
+        $product = $this->productService->createProduct($request);
 
+        //    attach categories
+        $product->categories()->attach($request->categories);
 
         return redirect()->route('products.index')->with('success', 'Product created successfully!');
     }
@@ -78,11 +82,15 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
+            'images.*' => 'image|mimes:jpg,png,jpeg| max:2048'
         ]);
 
         // call Service
         $this->productService->updateProduct($request, $product);
-
+        // sync categories
+        $product->categories()->sync($request->categories);
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');
     }
@@ -90,6 +98,7 @@ class ProductController extends Controller
     // Delete product
     public function destroy(Product $product)
     {
+        $product->categories()->detach();
         // call service
         $this->productService->deleteProduct($product);
         return redirect()->route('products.index')->with('success', 'Product deleted successfully!');
@@ -97,15 +106,20 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('category','images');
+        $product->load('categories', 'images');
+
+        // get category ids
+        $categoryIds = $product->categories->pluck('id');
 
         // Related Product
 
-        $relatedProducts=Product::where('category_id',$product->category_id)
-        ->where('id', '!=' , $product->id)
-        ->inRandomOrder()
-        ->take(4)
-        ->get();
-        return view('show', compact('product','relatedProducts'));
+        $relatedProducts = Product::whereHas('categories', function ($query) use ($categoryIds) {
+            $query->whereIn('categories.id', $categoryIds);
+        })
+            ->where('id', '!=', $product->id)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+        return view('show', compact('product', 'relatedProducts'));
     }
 }

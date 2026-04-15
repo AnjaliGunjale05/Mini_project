@@ -15,16 +15,26 @@ class ProductService
     public function getAllProducts(Request $request)
     {
         try {
-            $query = Product::query();
+            $query = Product::with('categories');
 
+            if (!empty($request->search)) {
+    $query->where(function ($q) use ($request) {
+        $q->where('name', 'LIKE', '%' . $request->search . '%')
+          ->orWhereHas('categories', function ($q2) use ($request) {
+              $q2->where('name', 'LIKE', '%' . $request->search . '%');
+          });
+    });
+}
             // Search filter
             if (!empty($request->search)) {
                 $query->where('name', 'LIKE', '%' . $request->search . '%');
             }
 
-            // Category filter
+            // Multti-Category filter
             if (!empty($request->category)) {
-                $query->where('category_id', $request->category);
+                $query->whereHas('categories', function ($q) use ($request) {
+                    $q->where('categories.id', $request->category);
+                });
             }
 
             return $query->latest()->paginate(12);
@@ -38,7 +48,7 @@ class ProductService
     public function createProduct($request)
     {
         try {
-            $data = $request->all();
+            $data = $request->except('categories');
 
             if ($request->hasfile('image')) {
                 $data['image'] = $request->file('image')->store('uploads/products', 'public');
@@ -71,7 +81,7 @@ class ProductService
     public function updateProduct($request, $product)
     {
         try {
-            $data = $request->all();
+            $data = $request->except('categories');
 
             if ($request->hasfile('image')) {
                 // Delete old image

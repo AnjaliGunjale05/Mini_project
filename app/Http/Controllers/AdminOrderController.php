@@ -2,13 +2,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminOrderService;
 use Illuminate\Http\Request;
 use App\Models\Order;
 
 class AdminOrderController extends Controller
 {
-    public function index(){
-        $orders = Order::with('user')->latest()->paginate(10);
+    protected $orderService;
+
+    public function __construct(AdminOrderService $orderService)
+    {
+        $this->orderService=$orderService;
+    }
+
+    public function index(Request $request){
+       
+        $orders = $this->orderService->getFilteredOrders($request);
         return view('admin.orders.index', compact('orders'));
     }
 

@@ -3,6 +3,22 @@
 @section('dashboard-content')
 
 <h2 class="text-2xl font-bold mb-6">Orders</h2>
+<form action="" class="mb-4 flex gap-4" method="get">
+    <select name="status" id="" class="border p-2">
+        <option value="">All status</option>
+        <option value="Pending" {{request('status') =='pending' ? 'selected' : ''}}>Pending</option>
+        <option value="shipped" {{request('status') == 'shipped' ? 'selected' : ''}}>Shipped</option>
+        <option value="delivered" {{request('status') == 'delivered' ? 'selected' : ''}}>Delivered</option>
+    </select>
+
+    <input type="date" name="from_date" class="border p-2" value="{{ request('from_date') }}">
+    <input type="date" name="to_date" class="border p-2" value="{{request('to_date')}}">
+
+    <button class="bg-blue-500 text-white px-4 py-2 rounded">Filter</button>
+
+    <a href="{{route('admin.orders.index')}}" class="bg-gray-500 text-white px-4 py-2 rounded"> Reset</a>
+
+</form>
 
 <table class="w-full border rounded-lg overflow-hidden">
     <thead class="bg-gray-100">

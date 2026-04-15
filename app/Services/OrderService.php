@@ -65,7 +65,7 @@ class OrderService
 
         // Send email after payment success
         try {
-            if ($order->email) {
+            if (!empty($order->email)) {
                 Mail::to($order->email)->send(new OrderPlacedMail($order));
             }
         } catch (Exception $e) {

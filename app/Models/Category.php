@@ -14,8 +14,9 @@ class Category extends Model
         'slug',
     ];
 
+    // Many to many relationship with Product
     public function products()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsToMany(Product::class);
     }
 }

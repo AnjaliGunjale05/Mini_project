@@ -73,7 +73,7 @@
 
                 <!-- Category -->
                 <p class="text-sm text-gray-500">
-                    {{ $product->category->name ?? 'No Category' }}
+                    {{ $product->categories->pluck('name')->join(', ') ? : 'No Category' }}
                 </p>
 
                 <!-- Price -->

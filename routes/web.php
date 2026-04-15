@@ -50,21 +50,25 @@ Route::middleware('auth')->group(function () {
 // ================= PAYMENT =================
 
 // Payment Page
-Route::get('/payment/{order}', [PaymentController::class, 'pay'])->name('payment.pay');
+// Route::get('/payment/{order}', [PaymentController::class, 'pay'])->name('payment.pay');
 
-// Payment Success (ONLY ONE ROUTE )
-Route::post('/payment-success', [PaymentController::class, 'success'])
-    ->name('payment.success');
+// // Payment Success 
+// Route::post('/payment-success', [PaymentController::class, 'success'])
+//     ->name('payment.success');
+
+Route::get('/payment/{id}', [PaymentController::class, 'pay'])->name('payment.pay');
+Route::get('/payment/success/{id}', [PaymentController::class, 'success'])->name('payment.success');
+
 
 // Confirmation Page
 Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])
-    ->name('checkout.confirmation');
+    ->name('checkout_confirmation');
 
 
 // ================= STATIC PAGES =================
-Route::view('/about', 'about')->name('about');
-Route::view('/contact', 'contact')->name('contact');
-Route::view('/privacy', 'privacy')->name('privacy');
+Route::view('/about', 'layouts.footerlinks.about')->name('about');
+Route::view('/contact', 'layouts.footerlinks.contact')->name('contact');
+Route::view('/privacy', 'layouts.footerlinks.privacy')->name('privacy');
 
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 

@@ -47,7 +47,12 @@
             <tr>
                 <td class="py-2 px-4 border">{{ $loop->iteration}}</td>
                 <td class="py-2 px-4 border ">{{ $product->name }}</td>
-                <td class="py-2 px-4 border">{{ $product->category?->name }}</td>
+                <!-- @foreach($product->categories as $category)
+                <span class="bg-gray-200 px-2 py-1 rounded">
+                    {{$category->name}}
+                </span>
+                @endforeach -->
+                <td class="py-2 px-4 border">{{ $product->categories->pluck('name')->join(', ') }}</td>
                 <td class="py-2 px-4 border">{{ $product->price }}</td>
                 <td class="py-2 px-4 border">{{ $product->stock }}</td>
                 <td class="py-2 px-4 border">

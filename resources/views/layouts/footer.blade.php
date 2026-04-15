@@ -60,10 +60,6 @@
             <div class="flex space-x-4 mt-4 text-xl">
                 <h3 class="font-bold text-lg mb-2">Follow us</h3>
 
-                <a href="https://womona.com" target="_blank" class="hover:text-pink-600">
-                    <i class="fas fa-globe"></i>
-                </a>
-
                 <a href="https://www.facebook.com/womona" target="_blank" class="hover:text-pink-600">
                     <i class="fab fa-facebook"></i>
                 </a>

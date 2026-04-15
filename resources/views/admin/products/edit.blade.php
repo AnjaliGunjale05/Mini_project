@@ -31,11 +31,11 @@
 
         <div class="mb-4">
         <label>Product Category</label>
-        <select name="category_id" class="w-full border p-2" required placeholder="Select category">
+        <select name="categories[]" id="categorySelect" multiple class="w-full border p-2" required placeholder="Select category">
             <option value="" disabled selected> Select Product Category</option>
             @foreach($categories as $category)
             <option value="{{ $category->id }}"
-             {{ old('category_id') == $category->id ? 'selected' : '' }}>
+             {{in_array($category->id, old('categories',$product->categories->pluck('id')->toArray())) ? 'selected' : '' }}>
                 {{ $category->name }}
             </option>
             @endforeach
@@ -83,5 +83,21 @@
             </a>
 </form>
 </div>
+
+<!-- CDN -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#categorySelect').select2({
+            placeholder: "Select Categories",
+            closeOnSelect: false,
+            width: '100%'
+        });
+    });
+</script>
 
 @endsection
