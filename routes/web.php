@@ -30,6 +30,7 @@ Route::get('/shop', [ProductController::class, 'index'])->name('shop');
 
 // Product Details
 Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
+Route::post('/review/store', [ProductController::class, 'storeReview'])->name('review.store');
 
 
 // ================= WISHLIST =================

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\ProductService;
+use App\Services\RecentProductService;
+use App\Services\ProductReviewService;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImages;
-use App\Services\RecentProductService;
+use App\Models\ProductReview;
+
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -18,13 +21,15 @@ class ProductController extends Controller
 {
     protected $productService;
     protected $recentProductService;
+    protected $reviewService;
     // Inject Service
     // Constructor _construct Special method
 
-    public function __construct(ProductService $productService, RecentProductService $recentProductService)
+    public function __construct(ProductService $productService, RecentProductService $recentProductService, ProductReviewService $reviewService)
     {
         $this->productService = $productService;
         $this->recentProductService = $recentProductService;
+        $this->reviewService = $reviewService;
     }
     //  Display List of product 
     public function index(Request $request)
@@ -116,6 +121,10 @@ class ProductController extends Controller
 
             $product->load('categories', 'images');
 
+            // Store Review and rating 
+            $reviews = $this->reviewService->getReviews($product->id);
+            $avgRating = $this->reviewService->getAverageRating($product->id);
+
             // Store Recently Viewed Products
             $this->recentProductService->store($product->id);
 
@@ -135,11 +144,51 @@ class ProductController extends Controller
             //  Get Recent Products for sidebar or section
             $recentProducts = $this->recentProductService->getRecentProducts();
 
-            return view('show', compact('product', 'relatedProducts', 'recentProducts'));
-        }
-         catch (Exception $e) {
+            return view(
+                'show',
+                compact(
+                    'product',
+                    'relatedProducts',
+                    'recentProducts',
+                    'reviews',
+                    'avgRating'
+                )
+            );
+        } catch (Exception $e) {
             Log::error('Product Show Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Unable to load product details at this time.');
+        }
+    }
+
+    public function storeReview(Request $request)
+    {
+        try {
+            $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'rating' => 'required|integer|min:1|max:5',
+                'review' => 'nullable|string|max:1000'
+            ]);
+
+            // Must be logged in
+            if (!Auth::check()) {
+                return redirect()->back()->with('error', 'Please login to submit review.');
+            }
+
+            $result = $this->reviewService->storeReview($request);
+
+            if ($result === 'already_reviewed') {
+                return redirect()->back()->with('error', 'You already reviewed this product.');
+            }
+
+            if ($result) {
+                return redirect()->back()->with('success', 'Review submitted successfully! Waiting for approval.');
+            }
+
+            return redirect()->back()->with('error', 'Failed to submit review.');
+        } catch (Exception $e) {
+            Log::error('Review Store Error: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong.');
         }
     }
 }

@@ -180,142 +180,251 @@
         </div>
     </div>
 
-    <!-- Recently Viewed Products -->
+    <!-- Product Reviews  and Ratings -->
+    <div class="mt-12 bg-white p-6 rounded-xl shadow">
+        <h2 class="text-2xl font-semibold mb-4"> Customer Reviews</h2>
 
-    @if(isset($recentProducts) && $recentProducts->count())
-    <div class="relative mt-12">
-        <h2 class="text-2xl font-semibold mb-6"> Recently Viewed Products </h2>
+        <!-- Average Rating -->
+        @php
+        $rating = round($avgRating ?? 0);
+        @endphp
+        <div class="flex items-center gap-3 mb-6">
+            <div class="flex text-yellow-500 text-xl">
+                @for($i = 1; $i <= 5; $i++)
+                    @if($i <=$rating)
+                    ★
+                    @else
+                    ☆
+                    @endif
+                    @endfor
+                    </div>
+                    <span class="text-gray-600">
+                        ({{number_format($avgRating ?? 0 , 1)}} / 5)
+                    </span>
+            </div>
 
-        <button id="recent-left"
-            onclick="scrollRecent(-300)"
-            class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
-            &#10094;
-        </button>
+            @auth
+            <form action="{{ route('review.store') }}" method="post" class="mb-8">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-        <button id="recent-right"
-            onclick="scrollRecent(300)"
-            class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
-            &#10095;
-        </button>
+                <!-- STAR Rating Input -->
 
-        <div id="recent-container" class="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar px-10">
-            @foreach($recentProducts as $item)
-            <a href="{{route('product.show',$item->id)}}"
-                class="min-w-[200px] bg-white p-4 shadow rounded">
+                <div class="mb-4">
+                    <label for="" class="block mb-2 font-medium"> Your Rating</label>
 
-                <!-- Image -->
-                <img src="{{ $item->image ? asset('storage/'.$item->image) : 'https://via.placeholder.com/300' }}"
-                    alt="" class="w-full h-60 object-cover rounded-lg border mb-2">
+                    <div id="star-rating" class="flex gap-1 text-2xl cursor-pointer">
+                        @for($i = 1; $i <= 5; $i++)
+                            <span onclick="setRating({{ $i }})" id="star-{{ $i }}">☆</span>
+                            @endfor
+                    </div>
+                    <input type="hidden" name="rating" id="rating-input">
+                </div>
+                <!-- Review Text -->
+                <div class="mb-4">
+                    <label class="block mb-2 font-medium">Your Review</label>
+                    <textarea name="review" rows="3"
+                        class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-pink-400"
+                        placeholder="Write your experience..."></textarea>
+                </div>
 
-                <!-- Name  -->
-                <h3 class="text-sm">
-                    {{$item->name}}
-                </h3>
+                <!-- Submit -->
+                <button type="submit"
+                    class="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700">
+                    Submit Review
+                </button>
+            </form>
 
-                <!-- Price -->
-                <p class="text-green-600 font-semibold text-sm mt-1">
-                    ₹{{number_format($item->price, 2)}}
-                </p>
+            @else
+            <p class="text-gray-500 mb-6">
+                Please <a href="{{ route('login') }}" class="text-pink-600 underline">login</a> to write a review.
+            </p>
+            @endauth
 
-                <!-- Badge -->
-                <span class="text-xs text-gray-500">Recently Viewed </span>
-            </a>
-            @endforeach
+            <!-- 📝 Recent Reviews -->
+            <div class="space-y-4">
+                @forelse($reviews as $review)
+                <div class="border-b pb-3">
+
+                    <!-- Stars -->
+                    <div class="text-yellow-400">
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <=$review->rating)
+                            ★
+                            @else
+                            ☆
+                            @endif
+                            @endfor
+                    </div>
+
+                    <!-- Review -->
+                    <p class="text-gray-700 mt-1">
+                        {{ $review->review ?? 'No comment provided.' }}
+                    </p>
+
+                    <!-- User -->
+                    <span class="text-xs text-gray-500">
+                        By {{ $review->user->name ?? 'User' }} • {{ $review->created_at->diffForHumans() }}
+                    </span>
+                </div>
+                @empty
+                <p class="text-gray-500">No reviews yet.</p>
+                @endforelse
+            </div>
         </div>
+
+        <!-- Recently Viewed Products -->
+
+        @if(isset($recentProducts) && $recentProducts->count())
+        <div class="relative mt-12 bg-white p-6 rounded-xl shadow">
+            <h2 class="text-2xl font-semibold mb-6"> Recently Viewed Products </h2>
+
+            <button id="recent-left"
+                onclick="scrollRecent(-300)"
+                class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
+                &#10094;
+            </button>
+
+            <button id="recent-right"
+                onclick="scrollRecent(300)"
+                class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
+                &#10095;
+            </button>
+
+            <div id="recent-container" class="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar px-10">
+                @foreach($recentProducts as $item)
+                <a href="{{route('product.show',$item->id)}}"
+                    class="min-w-[200px] bg-white p-4 shadow rounded">
+
+                    <!-- Image -->
+                    <img src="{{ $item->image ? asset('storage/'.$item->image) : 'https://via.placeholder.com/300' }}"
+                        alt="" class="w-full h-60 object-cover rounded-lg border mb-2">
+
+                    <!-- Name  -->
+                    <h3 class="text-sm">
+                        {{$item->name}}
+                    </h3>
+
+                    <!-- Price -->
+                    <p class="text-green-600 font-semibold text-sm mt-1">
+                        ₹{{number_format($item->price, 2)}}
+                    </p>
+
+                    <!-- Badge -->
+                    <span class="text-xs text-gray-500">Recently Viewed </span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
-    @endif
-</div>
 
-<!-- JS for Image Change -->
-<script>
-    let images = JSON.parse(document.getElementById('product-images').value);
+    <!-- JS for Image Change -->
+    <script>
+        // Array Images (Main + Thumbnails)
+        let images = [
+            "{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}",
+            @foreach($product -> images as $img)
+            "{{ asset('storage/'.$img->image_path) }}",
+            @endforeach
+        ];
 
-    let currentIndex = 0;
+        let currentIndex = 0;
 
-    function showImage(index) {
-        document.getElementById('main-image').src = images[index];
-        updateMainArrows();
-    }
-
-    function nextImage() {
-        if (currentIndex < images.length - 1) {
-            currentIndex++;
-            showImage(currentIndex);
+        function showImage(index) {
+            document.getElementById('main-image').src = images[index];
+            updateMainArrows();
         }
-    }
 
-    function prevImage() {
-        if (currentIndex > 0) {
-            currentIndex--;
-            showImage(currentIndex);
+        function nextImage() {
+            if (currentIndex < images.length - 1) {
+                currentIndex++;
+                showImage(currentIndex);
+            }
         }
-    }
 
-    function setImage(index) {
-        currentIndex = index;
-        showImage(index);
-    }
+        function prevImage() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showImage(currentIndex);
+            }
+        }
 
-    function updateMainArrows() {
-        document.getElementById('main-left').style.display =
-            currentIndex === 0 ? 'none' : 'block';
+        function setImage(index) {
+            currentIndex = index;
+            showImage(index);
+        }
 
-        document.getElementById('main-right').style.display =
-            currentIndex === images.length - 1 ? 'none' : 'block';
-    }
+        function updateMainArrows() {
+            document.getElementById('main-left').style.display =
+                currentIndex === 0 ? 'none' : 'block';
 
-    // THUMB SCROLL
-    function scrollThumb(value) {
-        const c = document.getElementById('thumb-container');
-        c.scrollBy({
-            left: value,
-            behavior: 'smooth'
-        });
-    }
+            document.getElementById('main-right').style.display =
+                currentIndex === images.length - 1 ? 'none' : 'block';
+        }
 
-    function updateThumbArrows() {
-        const c = document.getElementById('thumb-container');
+        // THUMB SCROLL
+        function scrollThumb(value) {
+            const c = document.getElementById('thumb-container');
+            c.scrollBy({
+                left: value,
+                behavior: 'smooth'
+            });
+        }
 
-        document.getElementById('thumb-left').style.display =
-            c.scrollLeft <= 0 ? 'none' : 'block';
+        function updateThumbArrows() {
+            const c = document.getElementById('thumb-container');
 
-        document.getElementById('thumb-right').style.display =
-            c.scrollLeft + c.clientWidth >= c.scrollWidth ? 'none' : 'block';
-    }
+            document.getElementById('thumb-left').style.display =
+                c.scrollLeft <= 0 ? 'none' : 'block';
 
-    document.getElementById('thumb-container')
-        .addEventListener('scroll', updateThumbArrows);
+            document.getElementById('thumb-right').style.display =
+                c.scrollLeft + c.clientWidth >= c.scrollWidth ? 'none' : 'block';
+        }
 
-    // RECENT SCROLL
-    function scrollRecent(value) {
-        const c = document.getElementById('recent-container');
-        c.scrollBy({
-            left: value,
-            behavior: 'smooth'
-        });
-    }
+        document.getElementById('thumb-container')
+            .addEventListener('scroll', updateThumbArrows);
 
-    function updateRecentArrows() {
-        const c = document.getElementById('recent-container');
+        // RECENT SCROLL
+        function scrollRecent(value) {
+            const c = document.getElementById('recent-container');
+            c.scrollBy({
+                left: value,
+                behavior: 'smooth'
+            });
+        }
 
-        document.getElementById('recent-left').style.display =
-            c.scrollLeft <= 0 ? 'none' : 'block';
+        function updateRecentArrows() {
+            const c = document.getElementById('recent-container');
 
-        document.getElementById('recent-right').style.display =
-            c.scrollLeft + c.clientWidth >= c.scrollWidth ? 'none' : 'block';
-    }
+            document.getElementById('recent-left').style.display =
+                c.scrollLeft <= 0 ? 'none' : 'block';
 
-    const recent = document.getElementById('recent-container');
-    if (recent) {
-        recent.addEventListener('scroll', updateRecentArrows);
-    }
+            document.getElementById('recent-right').style.display =
+                c.scrollLeft + c.clientWidth >= c.scrollWidth ? 'none' : 'block';
+        }
 
-    // INIT
-    window.onload = () => {
-        updateMainArrows();
-        updateThumbArrows();
-        updateRecentArrows();
-    };
-</script>
+        const recent = document.getElementById('recent-container');
+        if (recent) {
+            recent.addEventListener('scroll', updateRecentArrows);
+        }
 
-@endsection
+        // INIT
+        window.onload = () => {
+            updateMainArrows();
+            updateThumbArrows();
+            updateRecentArrows();
+        };
+
+        //  Star rating and reviews
+
+        function setRating(rating) {
+            document.getElementById('rating-input').value = rating;
+
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById('star-' + i).innerText = i <= rating ? '★' : '☆';
+            }
+        }
+    </script>
+
+    @endsection
