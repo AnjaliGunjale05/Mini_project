@@ -228,7 +228,12 @@
 
 <!-- JS for Image Change -->
 <script>
-    let images = JSON.parse(document.getElementById('product-images').value);
+    let images = [
+        "{{ asset('storage/'.$product->image) }}",
+        @foreach($product->images as $img)
+        "{{ asset('storage/'.$img->image_path) }}",
+        @endforeach
+    ];
 
     let currentIndex = 0;
 
