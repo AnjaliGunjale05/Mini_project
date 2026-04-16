@@ -140,16 +140,6 @@
     </div>
 </section>
 
-<!-- 🔷 OFFER SECTION -->
-<section class="bg-pink-600 text-white py-12 text-center">
-    <h2 class="text-3xl font-bold mb-2">
-        Flat 30% OFF
-    </h2>
-    <p class="mb-4">On selected items. Limited time offer!</p>
-    <a href="{{ route('shop') }}"
-        class="bg-white text-pink-600 px-6 py-2 rounded">
-        Shop Now
-    </a>
-</section>
+
 
 @endsection

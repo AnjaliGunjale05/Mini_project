@@ -7,7 +7,7 @@
     <!-- Breadcrumb -->
     <div class="text-sm text-gray-500 mb-5">
         <a href="{{ route('home') }}" class="hover:underline">Home</a> →
-        <a href="{{route('shop')}}" class="hover:underline">{{ $product->category->name ?? 'Category' }}</a> →
+        <a href="{{route('shop')}}" class="hover:underline">{{ $product->categories->pluck('name')->join(', ') ?? 'Category' }}</a> →
         <span class="text-gray-700">{{ $product->name }}</span>
     </div>
 
@@ -18,41 +18,60 @@
             <div class="relative">
 
                 <!-- LEFT ARROW -->
-                <button onclick="prevImage()"
-                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white shadow-md p-3 rounded-full z-10 hover:bg-gray-100">
+                <button id="main-left"
+                    onclick="prevImage()"
+                    class="hidden absolute left-2 top-1/2 -translate-y-1/2 bg-white shadow p-3 rounded-full z-10">
                     &#10094;
                 </button>
 
-                <!-- MAIN IMAGE -->
+                <!-- IMAGE -->
                 <img id="main-image"
                     src="{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}"
-                    class="w-full h-96 object-cover rounded-lg border transition duration-300">
+                    class="w-full h-96 object-cover rounded-lg border">
 
                 <!-- RIGHT ARROW -->
-                <button onclick="nextImage()"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white shadow-md p-3 rounded-full z-10 hover:bg-gray-100">
+                <button id="main-right"
+                    onclick="nextImage()"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white shadow p-3 rounded-full z-10">
                     &#10095;
                 </button>
 
             </div>
 
             <!-- Thumbnails -->
-            <div class="flex gap-3 mt-4 flex-wrap">
-                <!-- Main image thumbnail -->
-                <img onclick="setImage(0)"
-                    src="{{ asset('storage/' . $product->image) }}"
-                    class="w-20 h-20 object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded cursor-pointer border hover:border-pink-500">
+            <div class="relative mt-4">
 
-                <!-- Gallery images -->
-                @foreach($product->images as $img)
-                <img onclick="setImage({{$loop->index + 1}})"
-                    src="{{ asset('storage/' . $img->image_path) }}"
-                    class="w-20 h-20 object-cover transition-transform duration-300 hover:scale-110 cursor-zoom-in rounded cursor-pointer border hover:border-pink-500">
-                @endforeach
+                <button id="thumb-left"
+                    onclick="scrollThumb(-200)"
+                    class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
+                    &#10094;
+                </button>
+
+                <button id="thumb-right"
+                    onclick="scrollThumb(200)"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
+                    &#10095;
+                </button>
+
+                <div id="thumb-container"
+                    class="flex gap-3 overflow-x-auto scroll-smooth no-scrollbar px-8">
+
+                    <img onclick="setImage(0)"
+                        src="{{ asset('storage/'.$product->image) }}"
+                        class="w-20 h-20 flex-shrink-0 cursor-pointer">
+
+                    @foreach($product->images as $img)
+                    <img onclick="setImage({{ $loop->index + 1 }})"
+                        src="{{ asset('storage/'.$img->image_path) }}"
+                        class="w-20 h-20 flex-shrink-0 cursor-pointer">
+                    @endforeach
+
+                </div>
             </div>
         </div>
 
-        <!-- RIGHT: Product Details -->
+        <!-- Right Product Details  -->
+
         <div>
 
             <!-- Name -->
@@ -67,7 +86,7 @@
             <p class="text-gray-600 mb-3">
                 Category:
                 <span class="font-medium">
-                    {{ $product->category->name ?? 'N/A' }}
+                    {{ $product->categories->pluck('name')->join(', ') ?: 'N/A' }}
                 </span>
             </p>
 
@@ -125,8 +144,10 @@
             </div>
         </div>
 
-
     </div>
+
+    <!-- Related Products -->
+
     <div class="mt-12">
         <h2 class="text-2xl font-semibold mb-6">Related Products</h2>
 
@@ -160,12 +181,27 @@
     </div>
 
     <!-- Recently Viewed Products -->
+
     @if(isset($recentProducts) && $recentProducts->count())
-    <div class="mt-12">
+    <div class="relative mt-12">
         <h2 class="text-2xl font-semibold mb-6"> Recently Viewed Products </h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+        <button id="recent-left"
+            onclick="scrollRecent(-300)"
+            class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
+            &#10094;
+        </button>
+
+        <button id="recent-right"
+            onclick="scrollRecent(300)"
+            class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full z-10">
+            &#10095;
+        </button>
+
+        <div id="recent-container" class="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar px-10">
             @foreach($recentProducts as $item)
-            <a href="{{route('product.show',$item->id)}}" class="bg-white p-4 rounded-lg shadow transition-transform duration-300 hover:scale-110">
+            <a href="{{route('product.show',$item->id)}}"
+                class="min-w-[200px] bg-white p-4 shadow rounded">
 
                 <!-- Image -->
                 <img src="{{ $item->image ? asset('storage/'.$item->image) : 'https://via.placeholder.com/300' }}"
@@ -188,44 +224,98 @@
         </div>
     </div>
     @endif
-
 </div>
 
-
 <!-- JS for Image Change -->
- 
 <script>
-     // Create image array
-    let images = [
-        "{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}",
-        @foreach($product->images as $img)
-            "{{ asset('storage/'.$img->image_path) }}",
-        @endforeach
-    ];
+    let images = JSON.parse(document.getElementById('product-images').value);
 
     let currentIndex = 0;
 
     function showImage(index) {
         document.getElementById('main-image').src = images[index];
+        updateMainArrows();
     }
 
     function nextImage() {
-        currentIndex = (currentIndex + 1) % images.length;
-        showImage(currentIndex);
+        if (currentIndex < images.length - 1) {
+            currentIndex++;
+            showImage(currentIndex);
+        }
     }
 
     function prevImage() {
-        currentIndex = (currentIndex - 1 + images.length) % images.length;
-        showImage(currentIndex);
+        if (currentIndex > 0) {
+            currentIndex--;
+            showImage(currentIndex);
+        }
     }
 
     function setImage(index) {
         currentIndex = index;
-        showImage(currentIndex);
+        showImage(index);
     }
-    function changeImage(element) {
-        document.getElementById('main-image').src = element.src;
+
+    function updateMainArrows() {
+        document.getElementById('main-left').style.display =
+            currentIndex === 0 ? 'none' : 'block';
+
+        document.getElementById('main-right').style.display =
+            currentIndex === images.length - 1 ? 'none' : 'block';
     }
+
+    // THUMB SCROLL
+    function scrollThumb(value) {
+        const c = document.getElementById('thumb-container');
+        c.scrollBy({
+            left: value,
+            behavior: 'smooth'
+        });
+    }
+
+    function updateThumbArrows() {
+        const c = document.getElementById('thumb-container');
+
+        document.getElementById('thumb-left').style.display =
+            c.scrollLeft <= 0 ? 'none' : 'block';
+
+        document.getElementById('thumb-right').style.display =
+            c.scrollLeft + c.clientWidth >= c.scrollWidth ? 'none' : 'block';
+    }
+
+    document.getElementById('thumb-container')
+        .addEventListener('scroll', updateThumbArrows);
+
+    // RECENT SCROLL
+    function scrollRecent(value) {
+        const c = document.getElementById('recent-container');
+        c.scrollBy({
+            left: value,
+            behavior: 'smooth'
+        });
+    }
+
+    function updateRecentArrows() {
+        const c = document.getElementById('recent-container');
+
+        document.getElementById('recent-left').style.display =
+            c.scrollLeft <= 0 ? 'none' : 'block';
+
+        document.getElementById('recent-right').style.display =
+            c.scrollLeft + c.clientWidth >= c.scrollWidth ? 'none' : 'block';
+    }
+
+    const recent = document.getElementById('recent-container');
+    if (recent) {
+        recent.addEventListener('scroll', updateRecentArrows);
+    }
+
+    // INIT
+    window.onload = () => {
+        updateMainArrows();
+        updateThumbArrows();
+        updateRecentArrows();
+    };
 </script>
 
 @endsection

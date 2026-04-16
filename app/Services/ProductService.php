@@ -17,17 +17,17 @@ class ProductService
         try {
             $query = Product::with('categories');
 
-            if (!empty($request->search)) {
-    $query->where(function ($q) use ($request) {
-        $q->where('name', 'LIKE', '%' . $request->search . '%')
-          ->orWhereHas('categories', function ($q2) use ($request) {
-              $q2->where('name', 'LIKE', '%' . $request->search . '%');
-          });
-    });
-}
-            // Search filter
-            if (!empty($request->search)) {
-                $query->where('name', 'LIKE', '%' . $request->search . '%');
+            // Search by product name OR category name
+
+            if ($request->filled('search')) {
+                $search= $request->search;
+                
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%$search%")
+                        ->orWhereHas('categories', function ($q2) use ($search) {
+                            $q2->where('name', 'LIKE', "%$search%");
+                        });
+                });
             }
 
             // Multti-Category filter
@@ -63,7 +63,7 @@ class ProductService
                     $path = $img->store('uploads/products', 'public');
 
                     ProductImages::create(
-                        [ 
+                        [
                             'product_id' => $product->id,
                             'image_path' => $path,
                         ]
@@ -96,15 +96,15 @@ class ProductService
             $product->update($data);
             if ($request->hasFile('images')) {
 
-            //  Delete old gallery images
-            foreach ($product->images as $img) {
-                if (Storage::disk('public')->exists($img->image_path)) {
-                    Storage::disk('public')->delete($img->image_path);
+                //  Delete old gallery images
+                foreach ($product->images as $img) {
+                    if (Storage::disk('public')->exists($img->image_path)) {
+                        Storage::disk('public')->delete($img->image_path);
+                    }
+                    $img->delete();
                 }
-                $img->delete();
-            }
 
-            // New Gallery Image
+                // New Gallery Image
 
                 foreach ($request->file('images') as $img) {
                     $path = $img->store('uploads/products', 'public');
@@ -130,11 +130,11 @@ class ProductService
                 Storage::disk('public')->delete($product->image);
             }
 
-            foreach($product->images as $img){
+            foreach ($product->images as $img) {
                 if (Storage::disk('public')->exists($img->image_path)) {
-                Storage::disk('public')->delete($img->image_path);
-            }
-            $img->delete();
+                    Storage::disk('public')->delete($img->image_path);
+                }
+                $img->delete();
             }
             return $product->delete();
         } catch (Exception $e) {
