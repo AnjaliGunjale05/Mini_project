@@ -46,6 +46,26 @@
             @endforeach
         </select>
 
+        <!-- Min Price -->
+
+        <input type="number" name="min_price" value="{{ request('min_price') }}"
+        placeholder="Min Price"
+        class="w-full md:w-1/6 border rounded-lg px-4 py-2">
+
+    <!-- Max Price -->
+    <input type="number" name="max_price" value="{{ request('max_price') }}"
+        placeholder="Max Price"
+        class="w-full md:w-1/6 border rounded-lg px-4 py-2">
+
+    <!-- Rating -->
+    <select name="rating"
+        class="w-full md:w-1/6 border rounded-lg px-4 py-2">
+        <option value="">All Ratings</option>
+        <option value="5" {{ request('rating') == 5 ? 'selected' : '' }}>5 ⭐</option>
+        <option value="4" {{ request('rating') == 4 ? 'selected' : '' }}>4 ⭐ & above</option>
+        <option value="3" {{ request('rating') == 3 ? 'selected' : '' }}>3 ⭐ & above</option>
+    </select>
+
         <!-- Button -->
         <button type="submit"
             class="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition">

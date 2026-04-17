@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\ProductImages;
+use App\Models\ProductReview;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,9 +38,27 @@ class ProductService
                 });
             }
 
+            // Price Filter
+
+            if($request->filled('min_price')){
+                $query->where('price', '>=', $request->min_price);
+            }
+            if($request->filled('max_price')){
+                $query->where('price', '<=', $request->max_price);
+            }
+
+            // Rating Filter
+
+            if($request->filled('rating'))
+            $query->whereHas('reviews', function ($q) use ($request) {
+                $q->where('rating', '>=', $request->rating);
+            });
+
             return $query->latest()->paginate(12);
         } catch (Exception $e) {
-            return false;
+            \Log::error($e->getMessage());
+
+    return Product::latest()->paginate(12);
         }
     }
 
