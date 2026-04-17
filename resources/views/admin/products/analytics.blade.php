@@ -36,12 +36,12 @@
             <h2 class="text-lg font-semibold mb-4">🔥 Top Selling Products</h2>
 
             @foreach($topProducts as $product)
-                <div class="flex justify-between border-b py-2">
-                    <span>{{ $product->name }}</span>
-                    <span class="font-bold text-green-600">
-                        {{ $product->sales_count }}
-                    </span>
-                </div>
+            <div class="flex justify-between border-b py-2">
+                <span>{{ $product->name }}</span>
+                <span class="font-bold text-green-600">
+                    {{ $product->sales_count }}
+                </span>
+            </div>
             @endforeach
         </div>
 
@@ -50,12 +50,12 @@
             <h2 class="text-lg font-semibold mb-4"> Most Viewed Products</h2>
 
             @foreach($mostViewed as $product)
-                <div class="flex justify-between border-b py-2">
-                    <span>{{ $product->name }}</span>
-                    <span class="font-bold text-blue-600">
-                        {{ $product->views }}
-                    </span>
-                </div>
+            <div class="flex justify-between border-b py-2">
+                <span>{{ $product->name }}</span>
+                <span class="font-bold text-blue-600">
+                    {{ $product->views }}
+                </span>
+            </div>
             @endforeach
         </div>
 
@@ -64,8 +64,9 @@
     <!--  ORDER STATUS CHART -->
     <div class="bg-white p-6 rounded-xl shadow">
         <h2 class="text-lg font-semibold mb-4"> Order Status</h2>
-
-        <canvas id="orderChart" height="120"></canvas>
+        <div style="height: 120px; width: 120px; margin: auto;">
+            <canvas id="orderChart"></canvas>
+        </div>
     </div>
 
 </div>
@@ -73,24 +74,29 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const ctx = document.getElementById('orderChart');
+    new Chart(document.getElementById('orderChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {
+                !!json_encode($orderState - > keys()) !!
+            },
+            datasets: [{
+                data: {
+                    !!json_encode($orderState - > values()) !!
+                }
+            }]
+        },
+        options: {
+            responseive: true,
+            maintainAspectRatio: false,
 
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: {!! json_encode($orderState->keys()) !!},
-        datasets: [{
-            data: {!! json_encode($orderState->values()) !!}
-        }]
-    },
-    options: {
-        plugins: {
-            legend: {
-                position: 'bottom'
+            plugins: {
+                legend: {
+                    display:false
+                }
             }
         }
-    }
-});
+    });
 </script>
 
 @endsection

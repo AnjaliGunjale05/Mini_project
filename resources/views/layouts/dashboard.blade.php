@@ -20,36 +20,36 @@
 
                 <ul class="space-y-3">
                     <li>
-                        <a href="{{ route('admin.dashboard') }}" class="block p-2 hover:bg-gray-700 rounded">
+                        <a href="{{ route('admin.dashboard') }}" class="block p-2 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
                             Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.analytics') }}" class="block p-2 {{ request()->routeIs('admin.analytics') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
+                            Analytics
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('products.index') }}" class="block p-2 hover:bg-gray-700 rounded">
+                        <a href="{{ route('products.index') }}" class="block p-2 {{ request()->routeIs('admin.products.index') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
                             Manage Products
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('categories.index') }}" class="block p-2 hover:bg-gray-700 rounded">
+                        <a href="{{ route('categories.index') }}" class="block p-2 {{ request()->routeIs('admin.categories.index') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
                             Manage Categories
                         </a>
                     </li>
 
                     <li>
-                        <a href="{{ route('admin.orders.index') }}" class="block p-2 hover:bg-gray-700 rounded">
+                        <a href="{{ route('admin.orders.index') }}" class="block p-2 {{ request()->routeIs('admin.orders.index') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
                             Manage Orders
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.reviews') }}" class="block p-2 hover:bg-gray-700 rounded">
+                        <a href="{{ route('admin.reviews') }}" class="block p-2 {{ request()->routeIs('admin.reviews') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
                             Manage Reviews
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.analytics') }}" class="block p-2 hover:bg-gray-700 rounded">
-                            Analytics
                         </a>
                     </li>
 
