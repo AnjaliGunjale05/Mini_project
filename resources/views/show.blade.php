@@ -324,7 +324,7 @@
         // Array Images (Main + Thumbnails)
         let images = [
             "{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}",
-            @foreach($product -> images as $img)
+            @foreach($product->images as $img)
             "{{ asset('storage/'.$img->image_path) }}",
             @endforeach
         ];

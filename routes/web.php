@@ -92,10 +92,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 });
 
 //  ================= Admin Review Routes =================
-Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/reviews', [ProductController::class, 'adminReviews'])->name('admin.reviews');
-    Route::post('/admin/review/{id}/approve', [ProductController::class, 'approveReview'])->name('review.approve');
-    Route::delete('/admin/review/{id}', [ProductController::class, 'deleteReview'])->name('review.delete');
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+
+    Route::get('/reviews', [ProductController::class, 'adminReviews'])->name('admin.reviews');
+
+    Route::post('/review/approve/{id}', [ProductController::class, 'approveReview'])->name('admin.review.approve');
+
+    Route::delete('/review/delete/{id}', [ProductController::class, 'deleteReview'])->name('admin.review.delete');
+
 });
 
 // ================= PROFILE =================

@@ -170,8 +170,8 @@ class ProductController extends Controller
             ]);
 
             // Must be logged in
-            if (!Auth::check()) {
-                return redirect()->back()->with('error', 'Please login to submit review.');
+            if (!auth()->check()) {
+                return back()->with('error', 'Please login to submit review.');
             }
 
             $result = $this->reviewService->storeReview($request);
@@ -191,42 +191,36 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Something went wrong.');
         }
     }
+// Admin - list reviews
+public function adminReviews()
+{
+    try {
+        $reviews = $this->reviewService->getAllReviews();
+        return view('admin.reviews.index', compact('reviews'));
+    } catch (Exception $e) {
+        Log::error($e->getMessage());
+        return back()->with('error', 'Unable to load reviews');
+    }
+}
 
-    // Show all reviews (Admin)
-    public function adminReviews()
-    {
-        try{
-        $reviews = ProductReview::with('user', 'product')
-        ->latest()
-        ->get();
-
-        return view('admin.reviews.index',compact('reviews'));
-        } catch (Exception $e) {
-             Log::error('Review Store Error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to load reviews at this time.');
-        }
+// Approve
+public function approveReview($id)
+{
+    if ($this->reviewService->approve($id)) {
+        return back()->with('success', 'Review approved!');
     }
 
-    // Approve review (Admin)
-    public function approveReview($id)
-    {
-        try{
-            $review= ProductReview::findorFail($id);
-            $review->is_approved = 1;
-            $review->save();
+    return back()->with('error', 'Something went wrong');
+}
 
-            return back()->with('success', 'Review approved successfully!');
-        } catch (Exception $e) {
-             Log::error('Review Store Error: ' . $e->getMessage());
-            return back()->with('error', 'Review not found.');
-        }
+// Delete
+public function deleteReview($id)
+{
+    if ($this->reviewService->delete($id)) {
+        return back()->with('success', 'Review deleted!');
     }
 
-    // Delete review (Admin)
-    public function deleteReview($id)
-    {
-        ProductReview::findorfail($id)->delete();
-
-        return back()->with('success', 'Review deleted successfully!');
-    }
+    return back()->with('error', 'Something went wrong');
+}
+   
 }
