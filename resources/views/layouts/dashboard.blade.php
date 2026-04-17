@@ -43,10 +43,16 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.reviews') }}" class="block py-2 px-4 hover:bg-gray-700 rounded">
+                        <a href="{{ route('admin.reviews') }}" class="block p-2 hover:bg-gray-700 rounded">
                             Manage Reviews
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('admin.analytics') }}" class="block p-2 hover:bg-gray-700 rounded">
+                            Analytics
+                        </a>
+                    </li>
+
                 </ul>
             </div>
 

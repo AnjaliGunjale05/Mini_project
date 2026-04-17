@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderPlacedMail;
+use App\Models\Product;
 use Exception;
 
 class OrderService
@@ -62,6 +63,24 @@ class OrderService
             'transaction_id' => $transactionId,
             'payment_status' => 'paid',
         ]);
+
+        // Order Count Increase for each product
+        foreach ($order->items as $item) {
+            
+            $product = Product::find($item->product_id);
+
+            // Skip if product not found
+            if (!$product)  continue;
+
+            if ($product->stock >= $item->quantity) {
+
+                $product->decrement('stock', $item->quantity);
+            } else {
+                \Log::warning("Product ID {$product->id} is out of stock for Order ID {$order->id}");
+            }
+            //  Increase sales count for analytics
+            $product->increment('sales_count', $item->quantity);
+        }
 
         // Send email after payment success
         try {

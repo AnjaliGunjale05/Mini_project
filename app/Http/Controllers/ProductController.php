@@ -7,6 +7,7 @@ use App\Services\RecentProductService;
 use App\Services\ProductReviewService;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\ProductImages;
 use App\Models\ProductReview;
 
@@ -119,8 +120,10 @@ class ProductController extends Controller
     {
         try {
 
-            $product->load('categories', 'images');
+            // View count increase
+            $this->productService->increaseView($product);
 
+            $product->load('categories', 'images');
             // Store Review and rating 
             $reviews = $this->reviewService->getReviews($product->id);
             $avgRating = $this->reviewService->getAverageRating($product->id);
@@ -191,36 +194,62 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Something went wrong.');
         }
     }
-// Admin - list reviews
-public function adminReviews()
-{
-    try {
-        $reviews = $this->reviewService->getAllReviews();
-        return view('admin.reviews.index', compact('reviews'));
-    } catch (Exception $e) {
-        Log::error($e->getMessage());
-        return back()->with('error', 'Unable to load reviews');
-    }
-}
-
-// Approve
-public function approveReview($id)
-{
-    if ($this->reviewService->approve($id)) {
-        return back()->with('success', 'Review approved!');
+    // Admin - list reviews
+    public function adminReviews()
+    {
+        try {
+            $reviews = $this->reviewService->getAllReviews();
+            return view('admin.reviews.index', compact('reviews'));
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return back()->with('error', 'Unable to load reviews');
+        }
     }
 
-    return back()->with('error', 'Something went wrong');
-}
+    // Approve
+    public function approveReview($id)
+    {
+        if ($this->reviewService->approve($id)) {
+            return back()->with('success', 'Review approved!');
+        }
 
-// Delete
-public function deleteReview($id)
-{
-    if ($this->reviewService->delete($id)) {
-        return back()->with('success', 'Review deleted!');
+        return back()->with('error', 'Something went wrong');
     }
 
-    return back()->with('error', 'Something went wrong');
-}
-   
+    // Delete
+    public function deleteReview($id)
+    {
+        if ($this->reviewService->delete($id)) {
+            return back()->with('success', 'Review deleted!');
+        }
+
+        return back()->with('error', 'Something went wrong');
+    }
+
+    // Product ANalytics - Views and Sales Count
+
+    public function analytics()
+    {
+        try {
+            $topProducts = $this->productService->getTopSellingProducts(10);
+            $mostViewed = $this->productService->getMostViewedProducts(10);
+
+            $orderState = Order::selectRaw('status, count(*) as total')
+                ->groupby('status')
+                ->pluck('total', 'status');
+
+
+            return view(
+                'admin.products.analytics',
+                compact(
+                    'topProducts',
+                    'mostViewed',
+                    'orderState',
+                )
+            );
+        } catch (Exception $e) {
+            Log::error('Analytics Error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load analytics data');
+        }
+    }
 }

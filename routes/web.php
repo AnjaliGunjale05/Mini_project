@@ -102,6 +102,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
 });
 
+// ================= most viewed and order analytics =================
+
+Route::get('/admin/analytics', [ProductController::class, 'analytics'])
+    ->name('admin.analytics');
+
 // ================= PROFILE =================
 Route::middleware(['auth'])->group(function () {
 
