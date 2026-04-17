@@ -70,7 +70,6 @@ Route::get('/dashboard', function () {
     }
 
     return redirect()->route('home');
-
 })->middleware(['auth'])->name('dashboard');
 
 // ================= ADMIN =================
@@ -90,6 +89,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/profile', function () {
         return redirect()->route('profile.edit');
     });
+});
+
+//  ================= Admin Review Routes =================
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/reviews', [ProductController::class, 'adminReviews'])->name('admin.reviews');
+    Route::post('/admin/review/{id}/approve', [ProductController::class, 'approveReview'])->name('review.approve');
+    Route::delete('/admin/review/{id}', [ProductController::class, 'deleteReview'])->name('review.delete');
 });
 
 // ================= PROFILE =================

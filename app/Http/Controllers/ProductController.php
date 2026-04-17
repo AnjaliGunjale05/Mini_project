@@ -191,4 +191,42 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Something went wrong.');
         }
     }
+
+    // Show all reviews (Admin)
+    public function adminReviews()
+    {
+        try{
+        $reviews = ProductReview::with('user', 'product')
+        ->latest()
+        ->get();
+
+        return view('admin.reviews.index',compact('reviews'));
+        } catch (Exception $e) {
+             Log::error('Review Store Error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load reviews at this time.');
+        }
+    }
+
+    // Approve review (Admin)
+    public function approveReview($id)
+    {
+        try{
+            $review= ProductReview::findorFail($id);
+            $review->is_approved = 1;
+            $review->save();
+
+            return back()->with('success', 'Review approved successfully!');
+        } catch (Exception $e) {
+             Log::error('Review Store Error: ' . $e->getMessage());
+            return back()->with('error', 'Review not found.');
+        }
+    }
+
+    // Delete review (Admin)
+    public function deleteReview($id)
+    {
+        ProductReview::findorfail($id)->delete();
+
+        return back()->with('success', 'Review deleted successfully!');
+    }
 }
