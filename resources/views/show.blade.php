@@ -319,26 +319,21 @@
         @endif
     </div>
 
-<<<<<<< HEAD
-    <!-- JS for Image Change -->
-    <script>
-        // Array Images (Main + Thumbnails)
+<!-- JS for Image Change -->
+<script>
+    // Array Images (Main + Thumbnails)
         let images = [
             "{{ $product->image ? asset('storage/'.$product->image) : 'https://via.placeholder.com/400' }}",
             @foreach($product->images as $img)
             "{{ asset('storage/'.$img->image_path) }}",
             @endforeach
         ];
-=======
-<!-- JS for Image Change -->
-<script>
-    let images = [
-        "{{ asset('storage/'.$product->image) }}",
-        @foreach($product->images as $img)
-        "{{ asset('storage/'.$img->image_path) }}",
-        @endforeach
-    ];
->>>>>>> 'Fixed-arrow'
+    // let images = [
+    //     "{{ asset('storage/'.$product->image) }}",
+    //     @foreach($product->images as $img)
+    //     "{{ asset('storage/'.$img->image_path) }}",
+    //     @endforeach
+    // ];
 
         let currentIndex = 0;
 

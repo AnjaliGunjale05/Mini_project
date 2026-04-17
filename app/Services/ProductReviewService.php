@@ -24,7 +24,7 @@ class ProductReviewService
                 'product_id' => $request->product_id,
                 'rating' => $request->rating,
                 'review' => $request->review,
-                'is_approved' => 0
+                'is_approved' => 1
             ]);
         } catch (Exception $e) {
             return false;
@@ -37,7 +37,7 @@ class ProductReviewService
         try {
             return ProductReview::with('user')
                 ->where('product_id', $productId)
-                ->where('is_approved', 1)
+                // ->where('is_approved', 1)
                 ->latest()
                 ->take(5)
                 ->get();
@@ -51,7 +51,6 @@ class ProductReviewService
     {
         try {
             return ProductReview::where('product_id', $productId)
-                ->where('is_approved', 1)
                 ->avg('rating') ?? 0;
         } catch (Exception $e) {
             return 0;
