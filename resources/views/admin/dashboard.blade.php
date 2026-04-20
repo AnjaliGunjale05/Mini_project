@@ -135,7 +135,7 @@
 <!--  ORDER STATUS CHART -->
 <div class="bg-white p-6 rounded-xl shadow">
     <h2 class="text-lg font-semibold mb-4"> Order Status</h2>
-    <div style="height:120px; width:120px; margin:auto;">
+    <div class="w-full h-64 flex justify-center items-center">
         <canvas id="orderChart"></canvas>
     </div>
 </div>

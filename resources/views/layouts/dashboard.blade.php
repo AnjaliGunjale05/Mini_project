@@ -24,11 +24,11 @@
                             Dashboard
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="{{ route('admin.analytics') }}" class="block p-2 {{ request()->routeIs('admin.analytics') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
                             Analytics
                         </a>
-                    </li>
+                    </li> -->
 
                     <li>
                         <a href="{{ route('products.index') }}" class="block p-2 {{ request()->routeIs('admin.products.index') ? 'bg-gray-300 font-semibold' : 'hover:bg-gray-200' }} rounded">
