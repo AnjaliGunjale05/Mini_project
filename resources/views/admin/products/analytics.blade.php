@@ -8,7 +8,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <div class="bg-white p-4 rounded-xl shadow">
-            <h3 class="text-gray-500">Total Products</h3>
+            <h3 class="text-gray-500">Most Viewed Products</h3>
             <p class="text-2xl font-bold">{{ $topProducts->count() }}</p>
         </div>
 

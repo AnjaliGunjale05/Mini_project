@@ -240,7 +240,7 @@ class ProductController extends Controller
 
 
             return view(
-                'admin.products.analytics',
+                'admin.dashboard',
                 compact(
                     'topProducts',
                     'mostViewed',

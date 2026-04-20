@@ -75,9 +75,8 @@ Route::get('/dashboard', function () {
 // ================= ADMIN =================
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [ProductController::class, 'analytics'])
+    ->name('admin.dashboard');
 
     Route::resource('products', ProductController::class);
     Route::resource('categories', CategoryController::class);
